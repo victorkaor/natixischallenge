@@ -1,0 +1,154 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" controller="ExamplesController">
+    
+    <aura:handler name="init" value="this" action="{!c.doInit}" />
+    
+    <aura:handler event="aura:waiting" action="{!c.showSpinner}" />
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}" />
+    
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="examples" type="List" access="public" />
+    
+    <!-- Paging Attributes -->
+    <aura:attribute name="filteredData" type="List" />
+    <aura:attribute name="pageSize" type="Integer" default="15" />
+    <aura:attribute name="pageSizeOptions" type="Integer[]" default="15" />
+    <aura:attribute name="currentPageNumber" type="Integer" default="1" />
+    <aura:attribute name="totalPages" type="Integer" default="1" />
+    <aura:attribute name="searchPhrase" type="String" />
+    <!-- Paging Attributes -->
+    
+    <aura:attribute name="Spinner" type="boolean" default="false" />
+    
+    
+    <!-- Header -->
+    <div class="modal-header slds-modal__header slds-size_1-of-1">
+        <h4 class="title slds-text-heading--medium">{!$Label.c.TitleExample}</h4>
+    </div>
+    <!-- Header -->
+    
+    
+    <!--Body -->
+    
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__body">
+                    
+                    <!--loading spinner start... style=Brand Medium (blue dots)-->
+                    <aura:if isTrue="{!v.Spinner}">
+                        <div aura:id="spinnerId" class="slds-spinner_container">
+                            <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                                <span class="slds-assistive-text">{!$Label.c.LoadingExample}</span>
+                                <div class="slds-spinner__dot-a"></div>
+                                <div class="slds-spinner__dot-b"></div>
+                            </div>
+                        </div>
+                    </aura:if>
+                    <!-- Loading spinner end-->
+                    
+                    <!-- Painel Body -->
+                    <div class="slds-panel__body">
+                        <aura:renderIf isTrue="{!not(empty(v.examples))}">
+                            
+                            <!-- Conteudo -->
+                            
+                            <!-- Painel de Examples -->
+                            <div class="slds-card__header slds-box">
+                                <lightning:card variant="Narrow" title="{!$Label.c.ExamplesInformation}" iconName="standard:individual">
+                                    <div class="slds-size_2-of-2">
+                                        <div aura:id="transacoes" class="slds-card__header" style="position:relative">
+                                            <div class="slds-form--compound">
+                                                <div class="slds-scrollable slds-box slds-box_x-small slds-text-align_center slds-m-around_x-small">
+                                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                                        <thead>
+                                                            <tr class="slds-line-height_reset">
+                                                                <th class="slds-is-resizable slds-text-title--caps" scope="col">
+                                                                    <div class="slds-truncate" title="{!$Label.c.DetailExample}">{!$Label.c.DetailExample}</div>
+                                                                </th>
+                                                                <th class="slds-is-resizable slds-text-title--caps" scope="col">
+                                                                    <div class="slds-truncate" title="{!$Label.c.NameExample}">{!$Label.c.NameExample}</div>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <aura:iteration items="{! v.examples }" var="example" indexVar="index">
+                                                                <tr class="slds-hint-parent ">
+                                                                    <td data-label="ID">
+                                                                        <div >
+                                                                            <lightning:buttonIcon value="{!index}" onclick="{!c.toggle}" iconName="{!example.expanded?'utility:chevrondown':'utility:chevronright'}" />
+                                                                        </div>
+                                                                    </td> 
+                                                                    <td data-label="Nome">
+                                                                        <div class="slds-truncate" title="{! example.nameExample }"><a href="{! 'one/one.app#/sObject/' + example.idExample + '/view'}" target="_blank">{! example.nameExample }</a></div>
+                                                                    </td>
+                                                                    
+                                                                </tr>
+                                                                
+                                                                <aura:if isTrue="{!example.expanded}" >
+                                                                    <!-- Detail --> 
+                                                                    <aura:iteration items="{! example.Examples }" var="detail" indexVar="index"> 
+                                                                        <tr>
+                                                                            <td colspan="10">
+                                                                                    <div class="row">
+                                                                                        <div class="column">
+                                                                                            <h2><b>{!$Label.c.NameExample}</b></h2>
+                                                                                            <a href="{! 'one/one.app#/sObject/' + detail.Id + '/view'}" target="_blank"><p>{!detail.Name}</p></a>
+                                                                                        </div>            
+                                                                                    </div>
+                                                                            </td>
+                                                                        </tr> 
+                                                                    </aura:iteration> 
+                                                                    <!--Detail -->
+                                                                </aura:if>
+                                                                
+                                                            </aura:iteration>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Painel de Examples -->
+                                    
+                                    <!-- Pagination -->
+                                    <aura:renderIf isTrue="{!not(empty(v.examples))}">
+                                        <div class="slds-p-around_small slds-grid slds-grid_align-spread slds-grid_vertical-align-start">
+                                            <div></div>
+                                            <div>
+                                                <lightning:button label="{!$Label.c.FirstExample}" iconName="utility:left" iconPosition="left" onclick="{! c.onFirst }" disabled="{! v.currentPageNumber == 1 }" />
+                                                <lightning:button label="{!$Label.c.BackExample}" iconName="utility:chevronleft" iconPosition="left" onclick="{! c.onPrev }" disabled="{! v.currentPageNumber == 1 }" />
+                                                <span class="slds-var-p-horizontal_x-small">
+                                                    Page {! (v.currentPageNumber) } of {! (v.totalPages) }
+                                                </span>
+                                                <lightning:button label="{!$Label.c.NextExample}" iconName="utility:chevronright" iconPosition="right" onclick="{! c.onNext }" disabled="{! v.currentPageNumber == v.totalPages }" />
+                                                <lightning:button label="{!$Label.c.LastExample}" iconName="utility:right" iconPosition="right" onclick="{! c.onLast }" disabled="{! v.currentPageNumber == v.totalPages }" />
+                                            </div>
+                                        </div>
+                                    </aura:renderIf>
+                                </lightning:card>
+                            </div>
+                            <!-- Pagination -->
+                            
+                            <!-- Conteudo -->
+                            
+                            <aura:set attribute="else">
+                                <div class="slds-col slds-size_1-of-1 slds-m-left_x-small" style="padding:0.5rem;background:#F3F8AB">
+                                    <div style="color: #000000">
+                                        <lightning:icon iconName="utility:info" variant="inverse" size="Small" /> &nbsp;&nbsp; {!$Label.c.menssageExample}
+                                    </div>
+                                </div>
+                            </aura:set>
+                            
+                        </aura:renderIf>
+                        <!-- Painel Body -->
+                        
+                    </div>
+                </div>
+            </header>
+        </div>
+    </article>
+    <!-- Body -->
+    
+    
+    
+</aura:component>
